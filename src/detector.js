@@ -1,8 +1,9 @@
 /**
  * src/detector.js
  * Stateless change detector.
- * Compares previous and current price snapshots and emits CandidateEvents
- * for assets whose price moved by at least the configured threshold.
+ * Branches on sourceConfig.type:
+ *   'price'          — emits price-move events when |changePct| >= threshold
+ *   'github-release' — emits new-release events for entries absent from prev snapshot
  */
 
 import config from './config.js';
@@ -40,8 +41,8 @@ export function makeEventId(sourceId, asset, detectedAt) {
  * @param {object} sourceConfig  Source config entry (carries threshold)
  * @returns {CandidateEvent[]}
  */
-export function detect(prev, curr, sourceConfig) {
-  if (!prev) return [];  // First run: establish baseline, no events
+function detectPriceMoves(prev, curr, sourceConfig) {
+  if (!prev) return [];
 
   const threshold = sourceConfig.threshold ?? config.priceDefaultThreshold;
   const detectedAt = new Date();
@@ -75,4 +76,56 @@ export function detect(prev, curr, sourceConfig) {
   }
 
   return events;
+}
+
+/**
+ * Detect new GitHub release entries — entries present in curr but absent from prev.
+ *
+ * @param {object|null} prev  Previous snapshot (null on first run)
+ * @param {object} curr       Current snapshot
+ * @param {object} sourceConfig
+ * @returns {CandidateEvent[]}
+ */
+function detectNewReleases(prev, curr, sourceConfig) {
+  if (!prev) return [];  // First run: establish baseline, no events
+
+  const sourceId   = curr.sourceId;
+  const repo       = sourceConfig.repo;
+  const detectedAt = new Date().toISOString();
+  const events     = [];
+
+  for (const [entryId, entry] of Object.entries(curr.entries)) {
+    if (prev.entries?.[entryId]) continue; // already seen
+
+    events.push({
+      id:             `${sourceId}-${entry.tag}`,
+      sourceId,
+      type:           'new-release',
+      asset:          repo,
+      repo,
+      tag:            entry.tag,
+      title:          entry.title,
+      link:           entry.link,
+      detectedAt,
+      detectedValue:  entry.tag,
+    });
+  }
+
+  return events;
+}
+
+/**
+ * Route detection by source type.
+ *
+ * @param {object|null} prev  Previous snapshot (null on first run)
+ * @param {object} curr       Current snapshot
+ * @param {object} sourceConfig  Source config entry
+ * @returns {CandidateEvent[]}
+ */
+export function detect(prev, curr, sourceConfig) {
+  if (sourceConfig.type === 'github-release') {
+    return detectNewReleases(prev, curr, sourceConfig);
+  }
+  // Default: price sources
+  return detectPriceMoves(prev, curr, sourceConfig);
 }

@@ -4,7 +4,8 @@
  * by its type, attaches the VerificationResult, and returns the enriched event.
  */
 
-import { verify as binanceVerify } from './verifiers/binance.js';
+import { verify as binanceVerify }     from './verifiers/binance.js';
+import { verify as githubRestVerify }  from './verifiers/github-rest.js';
 
 /**
  * @param {object} event         CandidateEvent
@@ -20,12 +21,7 @@ export async function corroborate(event, sourceConfig) {
       break;
 
     case 'new-release':
-      // Phase 2 — github-rest.js verifier not implemented yet
-      verification = {
-        source: 'github-rest',
-        outcome: 'unavailable',
-        evidence: { reason: 'GitHub release verifier not yet implemented (Phase 2)' },
-      };
+      verification = await githubRestVerify(event, sourceConfig);
       break;
 
     default:

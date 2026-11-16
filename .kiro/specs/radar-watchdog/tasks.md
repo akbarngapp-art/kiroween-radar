@@ -94,20 +94,20 @@ The goal of this phase is a working end-to-end pipeline for crypto prices: poll 
 
 ## Phase 2: GitHub Releases Adapter
 
-- [ ] **2.1 GitHub releases adapter (`src/adapters/github-releases.js`)**
+- [x] **2.1 GitHub releases adapter (`src/adapters/github-releases.js`)**
   - Export `fetchSnapshot(sourceConfig)`.
   - Fetch the Atom feed URL from `sourceConfig.url`.
   - Parse XML using Node's `util` or a hand-rolled regex/string parser (no npm XML library).
   - Extract `<entry>` elements: `id`, `title`, `updated`, `link`.
   - Return a `Snapshot` with entries keyed by entry ID.
 
-- [ ] **2.2 Release verifier (`src/verifiers/github-rest.js`)**
+- [x] **2.2 Release verifier (`src/verifiers/github-rest.js`)**
   - Export `verify(event)`.
   - Extract `owner`, `repo`, `tag` from `event`.
   - Call `https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}` with an optional `Authorization: Bearer {GITHUB_TOKEN}` header when the env var is set.
   - Return `verified` on 200 + matching `tag_name`, `disputed` on 404 or mismatch, `unavailable` on network failure.
 
-- [ ] **2.3 Wire releases into poller**
+- [x] **2.3 Wire releases into poller**
   - Update `src/poller.js` to iterate `type: 'github-release'` sources.
   - Use `github-releases.js` adapter and `github-rest.js` verifier.
   - Detector: emit `new-release` event when a release entry ID is absent from the previous snapshot.
@@ -159,11 +159,11 @@ The goal of this phase is a working end-to-end pipeline for crypto prices: poll 
 
 ## Phase 5: Polish
 
-- [ ] **5.1 `config/sources.json` examples**
+- [x] **5.1 `config/sources.json` examples**
   - Replace placeholder GitHub repos with real, actively-releasing public repos.
   - Document each field in a companion `config/sources.schema.json`.
 
-- [ ] **5.2 Dashboard improvements**
+- [x] **5.2 Dashboard improvements**
   - Add a manual refresh button.
   - Color-code verification outcome badges (green = verified, yellow = disputed, red = unavailable).
   - Display a "last polled" timestamp from the report.

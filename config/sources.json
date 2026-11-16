@@ -27,6 +27,17 @@
         "symbol": "ETHUSDT",
         "url": "https://data-api.binance.vision/api/v3/ticker/price?symbol=ETHUSDT"
       }
+    },
+    {
+      "id": "github-nodejs",
+      "type": "github-release",
+      "adapter": "github-releases",
+      "repo": "nodejs/node",
+      "url": "https://github.com/nodejs/node/releases.atom",
+      "verification": {
+        "adapter": "github-rest",
+        "apiUrl": "https://api.github.com"
+      }
     }
   ]
 }

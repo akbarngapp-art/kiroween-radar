@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "radar/sources",
+  "title": "Radar sources configuration",
+  "description": "Schema for config/sources.json. Each entry in the sources array describes one polled data source.",
+  "type": "object",
+  "required": ["sources"],
+  "properties": {
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/Source"
+      }
+    }
+  },
+  "definitions": {
+    "Source": {
+      "type": "object",
+      "required": ["id", "type", "adapter", "url"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this source. Used as the snapshot filename and as a prefix on event IDs.",
+          "examples": ["coingecko-btc", "github-nodejs"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["price", "github-release"],
+          "description": "Source type. Determines which detection path runs in detector.js."
+        },
+        "adapter": {
+          "type": "string",
+          "enum": ["coingecko", "github-releases"],
+          "description": "Adapter module name. Poller uses this to select the correct fetchSnapshot implementation."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Primary URL to poll. For price sources this is the CoinGecko API base URL; for release sources this is the GitHub Atom feed URL."
+        },
+        "assets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "(price sources only) List of CoinGecko asset IDs to fetch, e.g. [\"bitcoin\", \"ethereum\"]."
+        },
+        "vsCurrency": {
+          "type": "string",
+          "default": "usd",
+          "description": "(price sources only) Quote currency for price comparison, e.g. \"usd\"."
+        },
+        "threshold": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "(price sources only) Fractional price-change threshold that triggers an event, e.g. 0.02 for 2%. Overrides the global default."
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$",
+          "description": "(github-release sources only) GitHub repository in owner/name format, e.g. \"nodejs/node\"."
+        },
+        "verification": {
+          "type": "object",
+          "required": ["adapter"],
+          "description": "Configuration for the verifier that corroborates detected events.",
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "enum": ["binance", "github-rest"],
+              "description": "Verifier adapter name. Selects the verify() implementation in src/verifiers/."
+            },
+            "symbol": {
+              "type": "string",
+              "description": "(binance verifier only) Binance trading pair symbol, e.g. \"BTCUSDT\"."
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "(binance verifier only) Full Binance ticker URL including query string."
+            },
+            "apiUrl": {
+              "type": "string",
+              "format": "uri",
+              "description": "(github-rest verifier only) GitHub REST API base URL, e.g. \"https://api.github.com\"."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": { "type": { "const": "price" } }
+      },
+      "then": {
+        "required": ["assets"],
+        "properties": {
+          "verification": {
+            "required": ["adapter", "symbol", "url"]
+          }
+        }
+      },
+      "else": {
+        "required": ["repo"],
+        "properties": {
+          "verification": {
+            "required": ["adapter", "apiUrl"]
+          }
+        }
+      }
+    }
+  }
+}
