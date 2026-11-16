@@ -400,19 +400,25 @@
       document.getElementById('meta').innerHTML =
         `Report generated: <strong>${fmtDate(generatedAt)}</strong> &nbsp;·&nbsp; ${events.length} event(s)`;
 
-      // Staleness check
+      // Staleness check — always set the banner state explicitly, so a
+      // banner shown by an earlier render never survives a fresh load.
+      const banner = document.getElementById('stale-banner');
       if (generatedAt) {
         const age = Date.now() - new Date(generatedAt).getTime();
         if (age > STALENESS_MS) {
-          const banner = document.getElementById('stale-banner');
           const mins = Math.round(age / 60000);
           banner.textContent = `⚠ Report is stale — generated ${mins} minutes ago. Data may be outdated.`;
           banner.style.display = 'block';
+        } else {
+          banner.style.display = 'none';
         }
+      } else {
+        banner.style.display = 'none';
       }
 
       const container = document.getElementById('events');
       if (events.length === 0) {
+        container.innerHTML = '';
         document.getElementById('status').innerHTML = `
           <div class="empty-state">
             <span class="icon">🔭</span>
@@ -422,6 +428,7 @@
         return;
       }
 
+      document.getElementById('status').innerHTML = '';
       container.innerHTML = events.map(renderCard).join('');
     }
 
