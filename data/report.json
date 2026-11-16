@@ -1,4 +1,26 @@
 {
-  "generatedAt": "2026-11-16T03:00:49.147Z",
-  "events": []
+  "generatedAt": "2026-11-16T03:58:09.996Z",
+  "events": [
+    {
+      "id": "coingecko-btc-bitcoin-2026111603",
+      "sourceId": "coingecko-btc",
+      "type": "price-move",
+      "asset": "bitcoin",
+      "detectedAt": "2026-11-16T03:58:00.325Z",
+      "detectedValue": 65056,
+      "previousValue": 68890.88,
+      "changePct": -5.57,
+      "verification": {
+        "source": "binance-vision",
+        "outcome": "verified",
+        "evidence": {
+          "coingeckoPrice": 65056,
+          "binancePrice": 65147.76,
+          "deltaPct": 0.14,
+          "fetchedAt": "2026-11-16T03:58:00.327Z"
+        }
+      },
+      "approvedAt": "2026-11-16T03:58:09.990Z"
+    }
+  ]
 }
