@@ -376,7 +376,7 @@
     async function loadReport() {
       let raw;
       try {
-        const resp = await fetch('./report.json');
+        const resp = await fetch('./report.json?t=' + Date.now(), { cache: 'no-store' });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         raw = await resp.text();
       } catch (err) {
