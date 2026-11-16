@@ -149,7 +149,7 @@ The goal of this phase is a working end-to-end pipeline for crypto prices: poll 
 - [x] **4.2 Per-cycle kill-switch logging**
   - Ensure the poller logs the kill-switch message exactly once per cycle, not once per fetch attempt.
 
-- [ ] **4.3 Graceful shutdown**
+- [x] **4.3 Graceful shutdown**
   - Handle `SIGINT` and `SIGTERM`: set the lock flag, wait for any in-progress cycle to finish, then exit cleanly.
 
 - [ ] **4.4 Snapshot retention on failure**
