@@ -50,6 +50,21 @@
     }
     .logo span { color: var(--accent); }
 
+    #refresh-btn {
+      cursor: pointer;
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius);
+      padding: 0.3rem 0.9rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    #refresh-btn:hover {
+      background: rgba(124, 58, 237, 0.25);
+    }
+
     #meta {
       font-size: 0.8rem;
       color: var(--muted);
@@ -164,6 +179,8 @@
     .stat { display: flex; flex-direction: column; gap: 0.1rem; }
     .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
     .stat-value { font-size: 0.95rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .stat-value a { color: var(--accent); text-decoration: none; }
+    .stat-value a:hover { text-decoration: underline; }
 
     .evidence-toggle {
       grid-column: 1 / -1;
@@ -195,7 +212,10 @@
 <body>
   <header>
     <div class="logo">⬡ <span>Radar</span></div>
-    <div id="meta">Loading…</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <button id="refresh-btn" onclick="loadReport()" title="Reload report.json">↺ Refresh</button>
+      <div id="meta">Loading…</div>
+    </div>
   </header>
 
   <div id="stale-banner">⚠ Report is stale — data may be outdated.</div>
@@ -230,14 +250,70 @@
 
     function renderCard(ev) {
       const outcome = ev.verification?.outcome ?? 'unavailable';
+      const evidenceJson = ev.verification?.evidence
+        ? JSON.stringify(ev.verification.evidence, null, 2)
+        : null;
+
+      const evidenceBlock = evidenceJson ? `
+          <details class="evidence-toggle">
+            <summary>Show evidence</summary>
+            <pre class="evidence-pre">${esc(evidenceJson)}</pre>
+          </details>` : '';
+
+      if (ev.type === 'new-release') {
+        const repo  = ev.asset ?? ev.repo ?? 'unknown';
+        const tag   = ev.detectedValue ?? ev.tag ?? 'unknown';
+        const title = ev.title ?? '';
+        const link  = ev.link  ?? null;
+
+        return `
+        <div class="card">
+          <div class="card-header">
+            <span class="asset-name">${esc(repo)}</span>
+            <span class="source-tag">${esc(ev.sourceId ?? '')}</span>
+            <span class="badge ${badgeClass(outcome)}">${badgeIcon(outcome)} ${esc(outcome)}</span>
+          </div>
+          <div class="change-pct up" style="font-size:1.1rem;">${esc(tag)}</div>
+          <div class="card-body">
+            <div class="stat">
+              <span class="stat-label">Tag</span>
+              <span class="stat-value">${esc(tag)}</span>
+            </div>
+            ${title ? `
+            <div class="stat">
+              <span class="stat-label">Title</span>
+              <span class="stat-value">${esc(title)}</span>
+            </div>` : ''}
+            ${ev.detectedAt ? `
+            <div class="stat">
+              <span class="stat-label">Detected at</span>
+              <span class="stat-value">${fmtDate(ev.detectedAt)}</span>
+            </div>` : ''}
+            ${ev.approvedAt ? `
+            <div class="stat">
+              <span class="stat-label">Approved at</span>
+              <span class="stat-value">${fmtDate(ev.approvedAt)}</span>
+            </div>` : ''}
+            ${ev.verification?.source ? `
+            <div class="stat">
+              <span class="stat-label">Verified by</span>
+              <span class="stat-value">${esc(ev.verification.source)}</span>
+            </div>` : ''}
+            ${link ? `
+            <div class="stat">
+              <span class="stat-label">Link</span>
+              <span class="stat-value"><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">View release ↗</a></span>
+            </div>` : ''}
+          </div>
+          ${evidenceBlock}
+        </div>`;
+      }
+
+      // Price-move card (original layout)
       const changePct = ev.changePct ?? 0;
       const direction = changePct >= 0 ? 'up' : 'down';
       const sign = changePct >= 0 ? '+' : '';
       const currency = 'USD';
-
-      const evidenceJson = ev.verification?.evidence
-        ? JSON.stringify(ev.verification.evidence, null, 2)
-        : null;
 
       return `
         <div class="card">
@@ -271,11 +347,7 @@
               <span class="stat-value">${esc(ev.verification.source)}</span>
             </div>` : ''}
           </div>
-          ${evidenceJson ? `
-          <details class="evidence-toggle">
-            <summary>Show evidence</summary>
-            <pre class="evidence-pre">${esc(evidenceJson)}</pre>
-          </details>` : ''}
+          ${evidenceBlock}
         </div>`;
     }
 
