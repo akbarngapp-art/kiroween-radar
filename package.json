@@ -1,0 +1,13 @@
+{
+  "name": "radar",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/poller.js",
+    "once": "node src/poller.js --once",
+    "cli": "node src/cli.js"
+  }
+}

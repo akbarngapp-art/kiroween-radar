@@ -1,0 +1,32 @@
+{
+  "sources": [
+    {
+      "id": "coingecko-btc",
+      "type": "price",
+      "adapter": "coingecko",
+      "assets": ["bitcoin"],
+      "vsCurrency": "usd",
+      "url": "https://api.coingecko.com/api/v3/simple/price",
+      "threshold": 0.02,
+      "verification": {
+        "adapter": "binance",
+        "symbol": "BTCUSDT",
+        "url": "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
+      }
+    },
+    {
+      "id": "coingecko-eth",
+      "type": "price",
+      "adapter": "coingecko",
+      "assets": ["ethereum"],
+      "vsCurrency": "usd",
+      "url": "https://api.coingecko.com/api/v3/simple/price",
+      "threshold": 0.02,
+      "verification": {
+        "adapter": "binance",
+        "symbol": "ETHUSDT",
+        "url": "https://data-api.binance.vision/api/v3/ticker/price?symbol=ETHUSDT"
+      }
+    }
+  ]
+}
